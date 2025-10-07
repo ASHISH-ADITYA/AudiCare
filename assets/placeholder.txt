@@ -1,0 +1,2 @@
+// Placeholder for icon.png - In a real project, you would add actual image files here
+// This file is just to ensure the assets directory exists

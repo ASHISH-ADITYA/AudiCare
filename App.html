@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AudiCare - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f4f8;
+            overflow: hidden;
+        }
+
+        .phone-frame {
+            width: 400px;
+            height: 720px;
+            background: #1abc9c;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 8px solid #2c3e50;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Hamburger Menu */
+        .hamburger-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .hamburger-btn span {
+            width: 24px;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-btn.active span:nth-child(1) {
+            transform: rotate(45deg) translate(7px, 7px);
+        }
+
+        .hamburger-btn.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger-btn.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        /* Sidebar Menu */
+        .sidebar {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(180deg, #16a085 0%, #1abc9c 100%);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 60px 24px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .sidebar-logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
+            background: transparent;
+            border: 3px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-logo-icon {
+            font-size: 30px;
+        }
+
+        .sidebar-title {
+            text-align: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+
+        .menu-item {
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: white;
+        }
+
+        .menu-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .menu-text {
+            flex: 1;
+        }
+
+        .menu-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .menu-description {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 998;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Main Content */
+        .content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 80px 24px 0;
+        }
+
+        /* Logo Section */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-circle {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 16px;
+            background: transparent;
+            border: 4px solid white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: rotate 8s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .heart-icon {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #1abc9c;
+        }
+
+        .brand-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            font-style: italic;
+            margin-bottom: 4px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-underline {
+            width: 100px;
+            height: 3px;
+            background: white;
+            margin: 0 auto 24px;
+        }
+
+        /* Title */
+        .main-title {
+            font-size: 36px;
+            font-weight: 800;
+            color: white;
+            text-align: center;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            font-style: italic;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: white;
+            text-align: center;
+            margin-bottom: 32px;
+            font-weight: 500;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 20px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1abc9c;
+            margin-bottom: 12px;
+        }
+
+        .card-content {
+            font-size: 14px;
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 12px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1abc9c;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            background: #16a085;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 16px;
+            position: relative;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover {
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .nav-label {
+            font-size: 10px;
+        }
+
+        /* Talk with Us Button */
+        .talk-button {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .talk-button:hover {
+            background: #34495e;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .talk-icon {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-frame">
+        <!-- Hamburger Menu Button -->
+        <button class="hamburger-btn" id="hamburgerBtn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <!-- Sidebar Menu -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <div class="sidebar-logo-icon">💚</div>
+                </div>
+                <div class="sidebar-title">Features Menu</div>
+            </div>
+            
+            <div class="sidebar-menu">
+                <div class="menu-item">
+                    <div class="menu-icon">🎯</div>
+                    <div class="menu-text">
+                        <div class="menu-title">Accurate Diagnosis</div>
+                        <div class="menu-description">AI-powered health analysis</div>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-icon">🔔</div>
+                    <div class="menu-text">
+                        <div class="menu-title">Generate Alerts</div>
+                        <div class="menu-description">Timely health notifications</div>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-icon">🤖</div>
+                    <div class="menu-text">
+                        <div class="menu-title">Real-Time Guidance</div>
+                        <div class="menu-description">Virtual assistance 24/7</div>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-icon">👨‍⚕️</div>
+                    <div class="menu-text">
+                        <div class="menu-title">Connect with Doc</div>
+                        <div class="menu-description">Direct communication channel</div>
+                    </div>
+                </div>
+
+                <div class="menu-item">
+                    <div class="menu-icon">🔒</div>
+                    <div class="menu-text">
+                        <div class="menu-title">Data Privacy</div>
+                        <div class="menu-description">Secure & encrypted data</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overlay -->
+        <div class="overlay" id="overlay"></div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo-circle">
+                    <div class="heart-icon">💚</div>
+                </div>
+                <div class="brand-name">AudiCare</div>
+                <div class="brand-underline"></div>
+            </div>
+
+            <!-- Main Title -->
+            <h1 class="main-title">AUDICARE</h1>
+            <p class="subtitle">Your Health Journey Starts Here</p>
+
+            <!-- Dashboard Cards -->
+            <div class="dashboard-container">
+                <div class="dashboard-card">
+                    <div class="card-title">Health Overview</div>
+                    <div class="card-content">
+                        Welcome to your health dashboard. Track your symptoms, get diagnoses, and stay connected with healthcare professionals.
+                    </div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="card-title">Quick Stats</div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Checkups</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">5</div>
+                            <div class="stat-label">Alerts</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">98%</div>
+                            <div class="stat-label">Accuracy</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">24/7</div>
+                            <div class="stat-label">Support</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <div class="nav-item">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">Home</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">🎯</div>
+                <div class="nav-label">Quest</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">📓</div>
+                <div class="nav-label">Journal</div>
+            </div>
+            
+            <button class="talk-button">
+                <span class="talk-icon">💬</span>
+                <span>Talk with Us</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+
+        // Toggle sidebar
+        hamburgerBtn.addEventListener('click', () => {
+            hamburgerBtn.classList.toggle('active');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking overlay
+        overlay.addEventListener('click', () => {
+            hamburgerBtn.classList.remove('active');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+        });
+
+        // Close sidebar when clicking menu items
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', () => {
+                hamburgerBtn.classList.remove('active');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
