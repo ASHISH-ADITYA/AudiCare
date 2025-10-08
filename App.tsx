@@ -13,6 +13,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import Constants from 'expo-constants';
 import TalkScreen from './TalkScreen';
+import LoginScreen from './LoginScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -28,6 +30,10 @@ const App = () => {
   const sidebarAnimation = useRef(new Animated.Value(-width * 0.75)).current;
   const rotateAnimation = useRef(new Animated.Value(0)).current;
 
+  // Auth state
+  const [user, setUser] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const startRotation = () => {
       Animated.loop(
@@ -41,15 +47,33 @@ const App = () => {
     startRotation();
   }, [rotateAnimation]);
 
+  useEffect(() => {
+    // Check for logged in user
+    const checkUser = async () => {
+      const savedUser = await AsyncStorage.getItem('loggedInUser');
+      if (savedUser) setUser(savedUser);
+      setLoading(false);
+    };
+    checkUser();
+  }, []);
+
+  const handleLogin = async (username: string) => {
+    setUser(username);
+    await AsyncStorage.setItem('loggedInUser', username);
+  };
+
+  const handleLogout = async () => {
+    setUser(null);
+    await AsyncStorage.removeItem('loggedInUser');
+  };
+
   const toggleSidebar = () => {
     const toValue = sidebarVisible ? -width * 0.75 : 0;
-    
     Animated.timing(sidebarAnimation, {
       toValue,
       duration: 400,
       useNativeDriver: true,
     }).start();
-    
     setSidebarVisible(!sidebarVisible);
   };
 
@@ -59,7 +83,13 @@ const App = () => {
     { icon: '🤖', title: 'Real-Time Guidance', description: 'Virtual assistance 24/7' },
     { icon: '👨‍⚕️', title: 'Connect with Doc', description: 'Direct communication channel' },
     { icon: '🔒', title: 'Data Privacy', description: 'Secure & encrypted data' },
+    { icon: '🚪', title: 'Logout', description: 'Sign out of your account', onPress: handleLogout },
   ];
+
+  if (loading) return null;
+  if (!user) {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -104,7 +134,10 @@ const App = () => {
                 <TouchableOpacity
                   key={index}
                   style={styles.menuItem}
-                  onPress={() => setSidebarVisible(false)}
+                  onPress={() => {
+                    setSidebarVisible(false);
+                    if (item.onPress) item.onPress();
+                  }}
                   activeOpacity={0.8}
                 >
                   <View style={styles.menuIcon}>
